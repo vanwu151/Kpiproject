@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>个人信息</title>
+    <link rel="shortcut icon" href="/static/Kpi/img/text.ico" type="image/x-icon">
+    
+
+<!-- css file -->
+<link href="/static/Kpi/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/font-awesome.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/toastr.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/sweetalert.css" rel="stylesheet">
+<link href="/static/Kpi/css/style.css" rel="stylesheet">
+<link href="/static/Kpi/css/jquery.validator.css" rel="stylesheet">
+<link href="/static/Kpi/css/datatables.min.css" rel="stylesheet">
+<!-- scripts -->
+<script src="/static/Kpi/js/jquery-2.1.1.js"></script>
+<script src="/static/Kpi/js/sweetalert.min.js"></script>
+<script src="/static/Kpi/js/bootstrap.min.js"></script>
+<script src="/static/Kpi/js/datatables.min.js"></script>
+    <link href="/static/Kpi/css/jumpserver.css" rel="stylesheet">
+    
+    <link href="/static/Kpi/css/sweetalert.css" rel="stylesheet">
+    <script src="/static/Kpi/js/sweetalert.min.js"></script>
+
+</head>
+
+<body>
+<div id="wrapper">
+    <nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav" id="side-menu">
+            
+
+<li class="nav-header">
+    <div class="dropdown profile-element">
+        <div target="_blank">
+            <img alt="logo" height="55" width="55" src="/static/Kpi/img/logo.png" style="margin-left: 40px">
+            <span class="nav-label">IT工时考核系统</span><span class="label label-info pull-right"></span>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+</li>
+                
+<li>
+    <a>
+        <span class="nav-label"></span><span class="label label-info pull-right"></span>
+    </a>
+</li>
+
+<li id="users" class="active">
+    <a>
+        <span class="nav-label">个人信息</span><span class="label label-info pull-right"></span>
+    </a>
+</li>
+<li>
+    <a href="/managerkaohe/">
+        <!-- <i class="fa fa-window-maximize" style="width: 14px"></i> -->
+        <span class="nav-label">我的考核</span>
+    </a>
+</li>
+<li>
+    <a href="/rules/">
+        <!-- <i class="fa fa-window-maximize" style="width: 14px"></i> -->
+        <span class="nav-label">部门考核规则</span>
+    </a>
+</li>
+            
+        </ul>
+    </div>
+</nav>
+
+    <div id="page-wrapper" class="gray-bg">
+        
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
+        
+        <ul class="nav navbar-top-links navbar-right">
+            <li class="dropdown">
+                
+                <a data-toggle="dropdown" class="dropdown-toggle">
+                    <span class="m-r-sm text-muted welcome-message">
+                        <span style="font-size: 13px;font-weight: 400"> {{ userinfo.name }}
+                            <b class="caret"></b>
+                        </span>
+                    </span>
+                </a>
+                <ul class="dropdown-menu animated fadeInRight m-t-xs profile-dropdown">                    
+                    <li>
+                        <a href="/logout/">注销登录</a>
+                    </li>
+                    <li>
+                        <a href="/Modinfo/">修改信息</a>
+                    </li>
+                </ul>
+                
+            </li>
+        </ul>
+    </nav>
+</div>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-10">
+        <h2></h2>
+        <ol class="breadcrumb">            
+        </ol>
+    </div>
+    <div class="col-sm-2">
+    </div>
+</div>
+<script>
+    function closePublicKeyMsg() {
+        setCookie('close_public_key_msg', 1)
+    }
+</script>
+        
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a class="text-center"> 个人信息 </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-8" style="padding-left: 0;">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <h5>{{ userinfo.info }}</h5>
+                                    <span class="label label-primary"><b>{{ userinfo.name }}.{{ userinfo.department }}</b></span>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="text-left">
+                                        <table class="table">
+                                            <tbody>
+                                            <tr class="no-borders-tr">
+                                                <td class="text-navy">用户名</td>
+                                                <td>{{ userinfo.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">部门</td>
+                                                <td>{{ userinfo.department }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">手机号</td>
+                                                <td>{{ userinfo.phone }}</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td class="text-navy">当月考核目标工时</td>
+                                                <form action="/Edittarget/" method="POST" enctype="multipart/form-data">
+                                                {% if userinfo.kaoheMonthTargetScore == None %}
+                                                    <td>
+                                                        当月还未设定考核目标！
+                                                    </td>
+                                                {% else %}
+                                                    <td>                                                        
+                                                        {{ userinfo.kaoheMonthTargetScore }}
+                                                    </td>
+                                                {% endif %}
+                                                </form>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">当月考核现有工时</td>
+                                                <td>{{ userinfo.kaoheNowScore }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">当月考核完成率</td>
+                                                <td>{{ userinfo.kaoheMonthFiprecent }}</td>
+                                            </tr>
+                                        </tbody></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="footer fixed">
+    <div class="pull-right">
+        Version <strong>1.0.1</strong>
+    </div>
+    <div>
+        <strong>Copyright</strong> :van.w © 2020
+    </div>
+</div>
+
+    </div>
+</div>
+
+</body></html>

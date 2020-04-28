@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)http://218.94.64.98:38880/users/login?next=/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 登录IT工时考核系统 </title>
+    <link rel="shortcut icon" href="/static/Kpi/img/text.ico" type="image/x-icon">
+    
+
+<!-- css file -->
+<link href="/static/Kpi/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/font-awesome.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/toastr.min.css" rel="stylesheet">
+<link href="/static/Kpi/css/sweetalert.css" rel="stylesheet">
+<link href="/static/Kpi/css/style.css" rel="stylesheet">
+<link href="/static/Kpi/css/jquery.validator.css" rel="stylesheet">
+<link href="/static/Kpi/css/datatables.min.css" rel="stylesheet">
+<!-- scripts -->
+<script src="/static/Kpi/js/jquery-2.1.1.js"></script>
+<script src="/static/Kpi/js/sweetalert.min.js"></script>
+<script src="/static/Kpi/js/bootstrap.min.js"></script>
+<script src="/static/Kpi/js/datatables.min.js"></script>
+    <link href="/static/Kpi/css/jumpserver.css" rel="stylesheet">
+    <script src="/static/Kpi/js/jumpserver.js"></script>
+    <style>
+        .captcha {
+             float: right;
+         }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="loginColumns animated fadeInDown">
+        <div class="form-group">
+            <h>{{ userinfo.info }}</h>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="font-bold">欢迎使用IT工时考核系统</h2>
+                <!-- <p>
+                    高效
+                </p>`
+                <p>
+                    方便
+                </p>
+                <p>
+                    简洁
+                </p> -->
+                <!-- <p>
+                    改变世界，从一点点开始。
+                </p> -->
+
+            </div>
+            <div class="col-md-6">
+                <div class="ibox-content">
+                    <div>
+                        <img src="/static/Kpi/img/logo.png" width="60" height="60">
+                        <span class="font-bold text-center" style="font-size: 24px; font-family: inherit; margin-left: 20px">登录</span>
+                    </div>
+                    <form class="m-t" role="form" method="post" action="/logininfo/">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="PttE4kyPuDcpCkZauuUOuGFcuhSQ3SK5Dyb11l3fuP5uS2Bbt1iebpKngBYo6j4F">
+                        
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="user" placeholder="用户名" required="" value="">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" name="pwd" placeholder="密码" required="">
+                        </div>
+                        <div>
+                            
+                        </div>
+                        <button type="submit" class="btn btn-primary block full-width m-b">登录</button>
+
+                        
+
+                        <a href="/register/">
+                            <small>注册</small>
+                        </a>
+
+                    </form>
+                    <p class="m-t">
+                    </p>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+	    <div class="pull-right">
+                 Version <strong>1.0.0</strong>
+            </div>
+            <div class="col-md-12">
+                 <strong>Copyright</strong> :van.w © 2020
+            </div>
+        </div>
+    </div>
+
+
+</body></html>
