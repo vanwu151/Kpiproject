@@ -157,6 +157,25 @@
                                                             <th class="text-center sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 200px;">动作</th>
                                                         </tr>
                                                     </thead>
+													<form action="/AddEvent/" method="POST" enctype="multipart/form-data">
+                                                        <tbody>
+                                                            <tr role="row" class="odd">
+                                                                <td class=" text-center"><input type="date" name="date" required="" style="width: 130px;"></td>
+                                                                <td class=" text-center"><input type="text" name="events" required="" style="width: 300px;"></td>
+                                                                <td class=" text-center">
+                                                                    <select name="kind" required="" style="width: 200px;">
+                                                                        {% for kaohenameKind in userinfo.kaohenameKindList %}                                                                           
+                                                                            <option value="{{ kaohenameKind }}" >{{ kaohenameKind }}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </td>
+                                                                <td class=" text-center"></td>
+                                                                <td class=" text-center">
+                                                                    <input type="submit" class="btn btn-xs btn-info" name="action" value="新增"/>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </form>
                                                     {% for scoreid, datetime, events, kind, pre in userinfo.kaohescoresinfoList %}
                                                         {% if scoreid == userinfo.editscoreid %}
                                                             {{ userinfo.editscoreid }}
@@ -207,25 +226,6 @@
                                                             </form>                                                        
                                                         {% endif %}    
                                                     {% endfor %}
-                                                    <form action="/AddEvent/" method="POST" enctype="multipart/form-data">
-                                                        <tbody>
-                                                            <tr role="row" class="odd">
-                                                                <td class=" text-center"><input type="date" name="date" required="" style="width: 130px;"></td>
-                                                                <td class=" text-center"><input type="text" name="events" required="" style="width: 300px;"></td>
-                                                                <td class=" text-center">
-                                                                    <select name="kind" required="" style="width: 200px;">
-                                                                        {% for kaohenameKind in userinfo.kaohenameKindList %}                                                                           
-                                                                            <option value="{{ kaohenameKind }}" >{{ kaohenameKind }}</option>
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                </td>
-                                                                <td class=" text-center"></td>
-                                                                <td class=" text-center">
-                                                                    <input type="submit" class="btn btn-xs btn-info" name="action" value="新增"/>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </form>
                                                 </table>
                                         </table>
                                     </div>

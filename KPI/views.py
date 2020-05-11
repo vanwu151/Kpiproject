@@ -1112,7 +1112,7 @@ def managerkaohe(request):
                 test = sc.objects.filter( score_user = name).exists()
                 if roles == 'manager': 
                     if test:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1142,7 +1142,7 @@ def managerkaohe(request):
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohenameKindList': kaohenameKindList}})
                 else:
                     if test:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1201,7 +1201,7 @@ def AddEvent(request):
                     info = '新增考核事项：' + events + '成功'
                     print(info)
                     try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1253,7 +1253,7 @@ def Editevents(request):
                         info = '自定义考核时长更新成功'
                     print(info)
                     try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1286,7 +1286,7 @@ def Editevents(request):
                     info = '考核事项已删除'
                     print(info)
                     try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1317,7 +1317,7 @@ def Editevents(request):
                     request.session['editscoreid'] = editscoreid
                     info = '正在编辑考核事项'
                     try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                         print(qsc, type(qsc))
                         # print(test)
                         scidList = []
@@ -1359,7 +1359,7 @@ def Editevents(request):
                         savesc.save()
                         info = '考核事项已更改！'
                         try:
-                            qsc = sc.objects.filter( score_user = name ).order_by( 'score_datetime' )
+                            qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
                             print(qsc, type(qsc))
                             # print(test)
                             scidList = []
