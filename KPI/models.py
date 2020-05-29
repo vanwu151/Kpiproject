@@ -20,7 +20,7 @@ class userinfo(models.Model):
 class kaoheinfo(models.Model):
 	kaoheinfo_user = models.CharField(max_length=20)
 	kaoheinfo_department = models.CharField(max_length=20)
-	kaoheinfo_month = models.DateTimeField('更新时间', default=timezone.now())
+	kaoheinfo_month = models.DateTimeField('更新时间', default=timezone.now)
 	kaoheinfo_monthtarget = models.IntegerField(blank=True, null=True)
 	kaoheinfo_monthtotal = models.IntegerField(blank=True, null=True)
 	kaoheinfo_monthfiprecent = models.CharField(max_length=20)
@@ -37,7 +37,9 @@ class kaohe(models.Model):
 
 class score(models.Model):
 	score_user = models.CharField(max_length=20)
-	score_datetime = models.DateTimeField('更新时间', default=timezone.now())
+	score_datetime = models.DateTimeField('更新时间', default=timezone.now)
+	score_require_department = models.CharField(max_length=20, default="")
+	score_require_username = models.CharField(max_length=20, default="")
 	score_events = models.CharField(max_length=500)
 	score_kind = models.CharField(max_length=100)
 	score_pre = models.IntegerField(blank=True, null=True)

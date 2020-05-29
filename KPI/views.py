@@ -11,6 +11,7 @@ from .models import userinfo as ui
 from .models import kaohe as kh
 from .models import score as sc
 from .models import kaoheinfo as ki
+from .KPIclass import *
 # Create your views here.
 
 
@@ -89,174 +90,15 @@ def logininfo(request):
                 if ad == 'manager':
                     info = '欢迎您，部门经理！'
                     userrole = '部门经理'
-                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )                    
-                    try:
-                        ki.objects.filter( kaoheinfo_month__year = '{}'.format(todayYear)).filter( kaoheinfo_month__month = '{}'.format(todayMonth)).filter( kaoheinfo_department = department ).filter( kaoheinfo_user = UserName).last() #查看登录的员工当月有无数据
-                        # koheinfoMonth = ki.objects.filter( kaoheinfo_department = department ).last().kaoheinfo_month.strftime('%Y-%m')
-                        kaoheMonthTargetScore =  ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   #当月考核目标值
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = UserName ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'
-                        else:
-                            kaoheNowScore = 0   # 如果修改的考核工时不为空或0 计算百分比
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                        myStuffList = []
-                        myStuffTargetScoreList = []
-                        myStuffNowScoreList = []
-                        myStuffFiprecentList = []
-                        for stuff in departmentStuff:
-                            myStuffList.append(stuff.user_name)
-                            print(myStuffList)
-                            try:
-                                myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                            except:
-                                myStuffTargetScore = None
-                            myStuffTargetScoreList.append(myStuffTargetScore)
-                            print(myStuffTargetScoreList)
-                            myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if myStuffNowScore != None:
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    myStuffNowScore = round( myStuffNowScore/60, 2)
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            else:
-                                myStuffNowScore = 0
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            print(myStuffNowScoreList)
-                            myStuffFiprecentList.append(myStuffFiprecent)
-                            print(myStuffFiprecentList)
-                        stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                        return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
-                    except:
-                        try:
-                            kaoheMonthTargetScore = None
-                            kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = UserName ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if kaoheNowScore != None:
-                                kaoheNowScore = round( kaoheNowScore/60, 2)    # 如果修改的考核工时不为空或0 计算百分比
-                                fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                                kaoheMonthFiprecent = fi + '%'
-                            else:
-                                kaoheNowScore = 0  
-                                fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                                kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
-                        except:
-                            kaoheMonthTargetScore = None
-                            try:
-                                kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if kaoheNowScore != None:
-                                    kaoheNowScore = round( kaoheNowScore/60, 2)
-                                else:
-                                    kaoheNowScore = None
-                                info = '当月还没有考核目标工时！'
-                                myStuffList = []
-                                myStuffTargetScoreList = []
-                                myStuffNowScoreList = []
-                                myStuffFiprecentList = []
-                                for stuff in departmentStuff:
-                                    myStuffList.append(stuff.user_name)
-                                    try:
-                                        myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                    except:
-                                        myStuffTargetScore = None
-                                    myStuffTargetScoreList.append(myStuffTargetScore)
-                                    myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                    if myStuffNowScore != None:
-                                        myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                        try:
-                                            myStuffNowScore = round( myStuffNowScore/60, 2)
-                                            sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                            myStuffFiprecent = sfi + '%'
-                                        except:
-                                            myStuffFiprecent = '0.0%'
-                                    else:
-                                        myStuffNowScore = 0
-                                        myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                        try:
-                                            myStuffNowScore = round( myStuffNowScore/60, 2)
-                                            sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                            myStuffFiprecent = sfi + '%'
-                                        except:
-                                            myStuffFiprecent = '0.0%'
-                                    myStuffFiprecentList.append(myStuffFiprecent)
-                                stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                                return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'stuffInfoList': stuffInfoList}})
-                            except:
-                                pass
+                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )
+                    managerview = showManagerInfo(departmentStuff, userrole, info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+                    managerInfoData = managerview.getManagerInfoData()
+                    return render(request, 'Kpi/showmanagerinfo.html', managerInfoData)
                 else:
-                    try:
-                        info = '欢迎您：{}'.format(name)
-                        kaoheMonthTargetScore =  ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   #当月考核目标值
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'
-                        else:
-                            kaoheNowScore = 0   # 如果考核工时不为空或0 计算百分比
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                        return render(request, 'Kpi/showinfo.html', {'userinfo': {'info': info, 'name': name, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent}})
-                    except:
-                        info = '欢迎您：{}'.format(name)
-                        kaoheMonthTargetScore = None
-                        try:
-                            kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if kaoheNowScore != None:
-                                kaoheNowScore = round( kaoheNowScore/60, 2)
-                            else:
-                                kaoheNowScore = None
-                            return render(request, 'Kpi/showinfo.html', {'userinfo': {'info': info, 'name': name, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore}})
-                        except:
-                            pass
-
+                    info = '欢迎您：{}'.format(name)
+                    userview = showUserInfo(info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+                    userInfoData = userview.getUserInfoData()
+                    return render(request, 'Kpi/showinfo.html', userInfoData)
             else:
                 info = '用户名或密码错误！'
                 return render(request, 'Kpi/Login.html', {'userinfo': {'info': info}})
@@ -284,129 +126,15 @@ def viewinfo(request):
                 if ad == 'manager':
                     info = '欢迎您，部门经理！'
                     userrole = '部门经理'
-                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name ) 
-                    try:
-                         #查看登录的员工当月有无数据
-                        # koheinfoMonth = ki.objects.filter( kaoheinfo_department = department ).last().kaoheinfo_month.strftime('%Y-%m')
-                        kaoheMonthTargetScore =  ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   #当月考核目标值
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'
-                        else:
-                            kaoheNowScore = 0   # 如果修改的考核工时不为空或0 计算百分比
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                        kiS = ki.objects.filter(kaoheinfo_user = name).last()         #更新kaoheinfo表中的信息
-                        kiS.kaoheinfo_monthtotal = kaoheNowScore                      #更新kaoheinfo现有考核时长
-                        kiS.kaoheinfo_monthfiprecent = kaoheMonthFiprecent            #更新kaoheinfo目前的考核完成百分比
-                        kiS.save()
-                        myStuffList = []
-                        myStuffTargetScoreList = []
-                        myStuffNowScoreList = []
-                        myStuffFiprecentList = []
-                        for stuff in departmentStuff:
-                            myStuffList.append(stuff.user_name)
-                            try:
-                                myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                            except:
-                                myStuffTargetScore = None
-                            myStuffTargetScoreList.append(myStuffTargetScore)
-                            myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if myStuffNowScore != None:
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    myStuffNowScore = round( myStuffNowScore/60, 2)
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            else:
-                                myStuffNowScore = 0
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    myStuffNowScore = round( myStuffNowScore/60, 2)
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            myStuffFiprecentList.append(myStuffFiprecent)
-                        stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                        return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent,'stuffInfoList': stuffInfoList}})
-                    except:
-                        kaoheMonthTargetScore = None
-                        try:
-                            kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if kaoheNowScore != None:
-                                kaoheNowScore = round( kaoheNowScore/60, 2)
-                            else:
-                                kaoheNowScore = None
-                            info = '当月还没有考核目标工时！'
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
-                        except:
-                            pass
+                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )
+                    managerview = showManagerInfo(departmentStuff, userrole, info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+                    managerInfoData = managerview.getManagerInfoData()
+                    return render(request, 'Kpi/showmanagerinfo.html', managerInfoData) 
                 else:
-                    try:
-                        info = '欢迎您：{}'.format(name)
-                        kaoheMonthTargetScore =  ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   #当月考核目标值
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'
-                        else:
-                            kaoheNowScore = 0   # 如果修改的考核工时不为空或0 计算百分比
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                        kiS = ki.objects.filter(kaoheinfo_user = name).last()         #更新kaoheinfo表中的信息
-                        kiS.kaoheinfo_monthtotal = kaoheNowScore                      #更新kaoheinfo现有考核时长
-                        kiS.kaoheinfo_monthfiprecent = kaoheMonthFiprecent            #更新kaoheinfo目前的考核完成百分比
-                        kiS.save()
-                        return render(request, 'Kpi/showinfo.html', {'userinfo': {'info': info, 'name': name, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent}})
-                    except:
-                        info = '欢迎您：{}'.format(name)
-                        kaoheMonthTargetScore = None
-                        try:
-                            kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if kaoheNowScore != None:
-                                kaoheNowScore = round( kaoheNowScore/60, 2)
-                            else:
-                                kaoheNowScore = None
-                            return render(request, 'Kpi/showinfo.html', {'userinfo': {'info': info, 'name': name, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore}})
-                        except:
-                            pass
+                    info = '欢迎您：{}'.format(name)
+                    userview = showUserInfo(info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+                    userInfoData = userview.getUserInfoData()
+                    return render(request, 'Kpi/showinfo.html', userInfoData)
             except:
                 pass
 
@@ -428,41 +156,6 @@ def Editstufftarget(request):
                 todayYear  = datetime.today().strftime('%Y')         #格式化str格式输出今天是几年
                 todayMonth = datetime.today().strftime('%m')         #格式化str格式输出今天是几月
                 departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )      #部门员工清单               
-                try:
-                    ki.objects.filter( kaoheinfo_month__year = '{}'.format(todayYear)).filter( kaoheinfo_month__month = '{}'.format(todayMonth)).filter( kaoheinfo_department = department ).filter( kaoheinfo_user = name).last() #查看登录的员工当月有无数据
-                    # koheinfoMonth = ki.objects.filter( kaoheinfo_department = department ).last().kaoheinfo_month.strftime('%Y-%m')
-                    kaoheMonthTargetScore =  ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   #当月考核目标值
-                    kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                    if kaoheNowScore != None:
-                        kaoheNowScore = round( kaoheNowScore/60, 2)
-                        fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                        kaoheMonthFiprecent = fi + '%'
-                    else:
-                        kaoheNowScore = 0   # 如果修改的考核工时不为空或0 计算百分比
-                        fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                        kaoheMonthFiprecent = fi + '%'     # 完成百分比为0
-                except:
-                    try:
-                        kaoheMonthTargetScore = None
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)    # 如果修改的考核工时不为空或0 计算百分比
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'
-                        else:
-                            kaoheNowScore = 0  
-                            fi = str(round((kaoheNowScore/int(kaoheMonthTargetScore)), 2)*100)
-                            kaoheMonthFiprecent = fi + '%'     # 完成百分比为0	
-                    except:
-                        kaoheMonthTargetScore = None
-                        try:
-                            kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if kaoheNowScore != None:
-                                kaoheNowScore = round( kaoheNowScore/60, 2)
-                            else:
-                                kaoheNowScore = None
-                        except:
-                            pass
                 if action == "OK":
                     if ad == 'manager':
                         userrole = '部门经理'
@@ -483,44 +176,12 @@ def Editstufftarget(request):
                             tki = ki( kaoheinfo_user=stuffName, kaoheinfo_department=department, kaoheinfo_month=kaoheInfoMonth, kaoheinfo_monthtarget=int(stuffTargetScore), kaoheinfo_monthtotal=stuffNowScore, kaoheinfo_monthfiprecent=stuffFiprecent )
                             tki.save()    # 保存 以上的所有信息到kaoheinfo表中
                             info = "{}：{}考核目标已添加！".format(stuffName, todayYearMonth)
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList':stuffInfoList}})
                 if action == "修改":
                     if ad == 'manager':
                         userrole = '部门经理'
                         stuffTargetScore = request.POST.get('stufftarget')
                         stuffName = request.POST.get('editstuffname')
-                        request.session['edstufftarget'] = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuffName ).last().kaoheinfo_monthtarget   # 将原考核目标时长存入session
+                        request.session['edstufftarget'] = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_department = department ).filter( kaoheinfo_user=stuffName ).last().kaoheinfo_monthtarget   # 将原考核目标时长存入session
                         if stuffTargetScore != '' or stuffTargetScore != '0':    # 判断目标工时用户填入是否为0或者''空
                             stuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuffName ).aggregate(Sum('score_pre'))['score_pre__sum']
                             if stuffNowScore != None:      # 判断现有工时是否为空，若不为空
@@ -531,90 +192,18 @@ def Editstufftarget(request):
                                 stuffNowScore = 0   # 如果修改的考核工时不为空或0 计算百分比
                                 fi = str(round((stuffNowScore/int(stuffTargetScore)), 2)*100)       # 计算现有工时与目标工时的完成百分比
                                 stuffFiprecent = fi + '%'
-                            etk = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuffName  ).last()  # 之编辑当前用户当年月的最后一条记录
+                            etk = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuffName  ).filter( kaoheinfo_department = department ).last()  # 之编辑当前用户当年月的最后一条记录
                             etk.kaoheinfo_monthtarget = int(stuffTargetScore)
                             etk.kaoheinfo_monthtotal = stuffNowScore
                             etk.kaoheinfo_monthfiprecent = stuffFiprecent
+                            etk.kaoheinfo_department = department
                             etk.save()
                             info = "{}：{}考核目标已修改！".format(stuffName, todayYearMonth)
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        myStuffNowScore = round( myStuffNowScore/60, 2)
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
             except:     # 如果出现目标考核工时为0的异常时
-                try:
-                    name = request.session['username']
-                    q = ui.objects.get( user_name = name )
-                    userrole = q.user_role
-                    department = q.user_department
-                    phone = q.user_phone
-                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )      #部门员工清单
-                except:
-                    pass
-                try:   
-                    myStuffList = []
-                    myStuffTargetScoreList = []
-                    myStuffNowScoreList = []
-                    myStuffFiprecentList = []
-                    for stuff in departmentStuff:
-                        myStuffList.append(stuff.user_name)
-                        try:
-                            myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                        except:
-                            myStuffTargetScore = None
-                        myStuffTargetScoreList.append(myStuffTargetScore)
-                        myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if myStuffNowScore != None:
-                            myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                            try:
-                                myStuffNowScore = round( myStuffNowScore/60, 2)
-                                sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                myStuffFiprecent = sfi + '%'
-                            except:
-                                myStuffFiprecent = '0.0%'
-                        else:
-                            myStuffNowScore = 0
-                            myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                            try:
-                                myStuffNowScore = round( myStuffNowScore/60, 2)
-                                sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                myStuffFiprecent = sfi + '%'
-                            except:
-                                myStuffFiprecent = '0.0%'
-                        myStuffFiprecentList.append(myStuffFiprecent)
-                    stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                    info = '目标值不得为空或者0！'
-                    return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
-                except:
-                    pass
+                info = '目标值不得为空或者0！'
+            managerview = showManagerInfo(departmentStuff, userrole, info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+            managerInfoData = managerview.getManagerInfoData()
+            return render(request, 'Kpi/showmanagerinfo.html', managerInfoData)
 
 
 def Edittarget(request):
@@ -652,41 +241,11 @@ def Edittarget(request):
                             tki = ki( kaoheinfo_user=name, kaoheinfo_department=department, kaoheinfo_month=kaoheInfoMonth, kaoheinfo_monthtarget=int(kaoheMonthTargetScore), kaoheinfo_monthtotal=kaoheNowScore, kaoheinfo_monthfiprecent=kaoheMonthFiprecent )
                             tki.save()    # 保存 以上的所有信息到kaoheinfo表中
                             info = "{}：{}考核目标已添加！".format(name, todayYearMonth)
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList':stuffInfoList}})
                 if action == "修改":
                     if ad == 'manager':
                         userrole = '部门经理'
                         kaoheMonthTargetScore = request.POST.get('target')
-                        request.session['edkhtarget'] = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).last().kaoheinfo_monthtarget   # 将原考核目标时长存入session
+                        request.session['edkhtarget'] = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=name ).filter( kaoheinfo_department = department ).last().kaoheinfo_monthtarget   # 将原考核目标时长存入session
                         print(kaoheMonthTargetScore, type(kaoheMonthTargetScore))
                         if kaoheMonthTargetScore != '' or kaoheMonthTargetScore != '0':     # 如果修改的目标考核时长不为空或0
                             kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
@@ -705,155 +264,26 @@ def Edittarget(request):
                             etk.kaoheinfo_monthfiprecent = kaoheMonthFiprecent
                             etk.save()
                             info = "{}：{}考核目标已修改！".format(name, todayYearMonth)
-                            myStuffList = []
-                            myStuffTargetScoreList = []
-                            myStuffNowScoreList = []
-                            myStuffFiprecentList = []
-                            for stuff in departmentStuff:
-                                myStuffList.append(stuff.user_name)
-                                try:
-                                    myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                                except:
-                                    myStuffTargetScore = None
-                                myStuffTargetScoreList.append(myStuffTargetScore)
-                                myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                                if myStuffNowScore != None:
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                else:
-                                    myStuffNowScore = 0
-                                    myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                    try:
-                                        sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                        myStuffFiprecent = sfi + '%'
-                                    except:
-                                        myStuffFiprecent = '0.0%'
-                                myStuffFiprecentList.append(myStuffFiprecent)
-                            stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                            return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'kaoheMonthFiprecent': kaoheMonthFiprecent, 'stuffInfoList': stuffInfoList}})
             except:     # 如果出现目标考核工时为0的异常时
-                try:
-                    departmentStuff = ui.objects.filter( user_department = department ).exclude( user_name = name )      #部门员工清单
-                except:
-                    pass
-                try:   
-                    kaoheMonthTargetScore = request.session['edkhtarget']       # 修改目标工时时出现异常,计算百分比时考核目标工时为0抛出异常
-                    kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                    if kaoheNowScore != None:
-                        kaoheNowScore = round( kaoheNowScore/60, 2)
-                    else:
-                        kaoheNowScore = None
-                    info = '目标值不得为空或者0！'
-                    myStuffList = []
-                    myStuffTargetScoreList = []
-                    myStuffNowScoreList = []
-                    myStuffFiprecentList = []
-                    for stuff in departmentStuff:
-                        myStuffList.append(stuff.user_name)
-                        try:
-                            myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                        except:
-                            myStuffTargetScore = None
-                        myStuffTargetScoreList.append(myStuffTargetScore)
-                        myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if myStuffNowScore != None:
-                            myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                            try:
-                                sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                myStuffFiprecent = sfi + '%'
-                            except:
-                                myStuffFiprecent = '0.0%'
-                        else:
-                            myStuffNowScore = 0
-                            myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                            try:
-                                sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                myStuffFiprecent = sfi + '%'
-                            except:
-                                myStuffFiprecent = '0.0%'
-                        myStuffFiprecentList.append(myStuffFiprecent)
-                    stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                    return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'stuffInfoList': stuffInfoList}})
-                except:         # 新增目标工时时出现异常，计算百分比时考核目标工时为0抛出异常
-                    kaoheMonthTargetScore = None
-                    try:
-                        kaoheNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                        if kaoheNowScore != None:
-                            kaoheNowScore = round( kaoheNowScore/60, 2)
-                        else:
-                            kaoheNowScore = None
-                        info = '请填写当月目标不得为空或0！'
-                        myStuffList = []
-                        myStuffTargetScoreList = []
-                        myStuffNowScoreList = []
-                        myStuffFiprecentList = []
-                        for stuff in departmentStuff:
-                            myStuffList.append(stuff.user_name)
-                            try:
-                                myStuffTargetScore = ki.objects.filter( kaoheinfo_month=kaoheInfoMonth ).filter( kaoheinfo_user=stuff.user_name ).last().kaoheinfo_monthtarget
-                            except:
-                                myStuffTargetScore = None
-                            myStuffTargetScoreList.append(myStuffTargetScore)
-                            myStuffNowScore = sc.objects.filter( score_datetime__year = '{}'.format(todayYear) ).filter( score_datetime__month = '{}'.format(todayMonth)).filter( score_user = stuff.user_name ).aggregate(Sum('score_pre'))['score_pre__sum']
-                            if myStuffNowScore != None:
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            else:
-                                myStuffNowScore = 0
-                                myStuffNowScoreList.append(round( myStuffNowScore/60, 2))
-                                try:
-                                    sfi = str(round((myStuffNowScore/int(myStuffTargetScore)), 2)*100)
-                                    myStuffFiprecent = sfi + '%'
-                                except:
-                                    myStuffFiprecent = '0.0%'
-                            myStuffFiprecentList.append(myStuffFiprecent)
-                        stuffInfoList = zip(myStuffList, myStuffTargetScoreList, myStuffNowScoreList, myStuffFiprecentList)
-                        return render(request, 'Kpi/showmanagerinfo.html', {'userinfo': {'info': info, 'name': name, 'userrole':userrole, 'department':department, 'phone': phone, 'kaoheMonthTargetScore': kaoheMonthTargetScore, 'kaoheNowScore': kaoheNowScore, 'stuffInfoList': stuffInfoList}})
-                    except:
-                        pass
+                info = '目标值不得为空或者0！'
+            managerview = showManagerInfo(departmentStuff, userrole, info, name, kaoheInfoMonth, department, todayYear, todayMonth, phone)
+            managerInfoData = managerview.getManagerInfoData()
+            return render(request, 'Kpi/showmanagerinfo.html', managerInfoData)
+
+
 
 def rules(request):
     if request.session.get('is_login',None):
         if request.method == "GET":
-            try:
-                name = request.session['username']
-                q = ui.objects.get( user_name = name )
-                department = q.user_department
-                test = kh.objects.filter( kaohe_department = department).exists()
-                role = q.user_role 
-                if test:
-                    qkh = kh.objects.all()
-                    print(qkh, type(qkh))
-                    # print(test)
-                    knameList = []
-                    kKindList = []
-                    kscoreList = []
-                    for v1 in qkh:
-                        knameList.append(v1.kaohe_name)
-                        kKindList.append(v1.kaohe_kind)
-                        kscoreList.append(v1.kaohe_score)
-                        print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                    kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                    if role == 'manager':
-                        return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                    else:
-                        return render(request, 'Kpi/showrulesinfo.html', {'userinfo': {'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                else:
-                    info = '该部门还没有考核规则'
-                    if role == 'manager':
-                        return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info}})
-                    else:
-                        return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info}})
-            except:
-                pass
+            name = request.session['username']
+            kpiInfoView = getKpiRules(name)
+            kpiInfoData = kpiInfoView.getKpiRulesData()
+            if kpiInfoData['userinfo']['role'] == 'manager':
+                return render(request, 'Kpi/showkaoherulesinfo.html', kpiInfoData)
+            else:
+                return render(request, 'Kpi/showrulesinfo.html', kpiInfoData)
+
+
 
 def AddRules(request):
     if request.session.get('is_login',None):
@@ -864,53 +294,12 @@ def AddRules(request):
                 department = q.user_department
                 action = request.POST.get('action')
                 if action == "新增":
-                    kind=request.POST.get('kaohe_kind')
-                    print(kind, type(kind))                                                      
+                    kind=request.POST.get('kaohe_kind')                                                      
                     kaoheName = request.POST.get('kaohe_name')
-                    print(kaoheName, type(kaoheName))
-                    try:
-                        qKaoHeName = kh.objects.get( kaohe_name = kaoheName ).kaohe_name         #考核规则kaohe_name去重
-                        info = '考核规则：' + qKaoHeName + '已存在！'
-                        print(info)
-                        qkh = kh.objects.all()
-                        print(qkh, type(qkh))
-                        knameList = []
-                        kKindList = []
-                        kscoreList = []
-                        for v1 in qkh:
-                            knameList.append(v1.kaohe_name)
-                            kKindList.append(v1.kaohe_kind)
-                            kscoreList.append(v1.kaohe_score)
-                            print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                        kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                        return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                    except:                      
-                        kaoheScore = request.POST.get('kaohe_score')
-                        print(kaoheScore, type(kaoheScore))
-                        if kaoheScore != '':
-                            kaoheScore = int(kaoheScore)
-                            k = kh(kaohe_name = kaoheName, kaohe_department = department, kaohe_kind = kind, kaohe_score = kaoheScore)
-                            k.save()
-                        else:
-                            k = kh(kaohe_name = kaoheName, kaohe_department = department, kaohe_kind = kind)
-                            k.save()
-                        info = '新增考核规则：' + kaoheName + '成功'
-                        print(info)
-                        try:
-                            qkh = kh.objects.all()
-                            print(qkh, type(qkh))
-                            knameList = []
-                            kKindList = []
-                            kscoreList = []
-                            for v1 in qkh:
-                                knameList.append(v1.kaohe_name)
-                                kKindList.append(v1.kaohe_kind)
-                                kscoreList.append(v1.kaohe_score)
-                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                        except:
-                            pass
+                    kaoheScore = request.POST.get('kaohe_score')
+                    AddedRulesView = getAddedRules(name, kind = kind, kaoheName = kaoheName , kaoheScore = kaoheScore , department = department)
+                    AddedRulesData = AddedRulesView.getAddedRulesData()
+                    return render(request, 'Kpi/showkaoherulesinfo.html', AddedRulesData)
             except:
                 pass
 
@@ -921,182 +310,35 @@ def EditRules(request):
                 name = request.session['username']
                 q = ui.objects.get( user_name = name )
                 department = q.user_department
-                test = kh.objects.filter( kaohe_department = department).exists()
+                test = kh.objects.filter( kaohe_department = department).exists()  #判断该部门是否有考核事项
                 if test:
                     action = request.POST.get('action')
                     try:
                         if action == "删除":
                             editkaoheName = request.POST.get('editkaohename')
-                            kq = kh.objects.get( kaohe_name = editkaoheName)
-                            kq.delete()
-                            info = '考核规则：' + editkaoheName + '  已删除'
-                            qkh = kh.objects.all()
-                            print(qkh, type(qkh))
-                            knameList = []
-                            kKindList = []
-                            kscoreList = []
-                            for v1 in qkh:
-                                knameList.append(v1.kaohe_name)
-                                kKindList.append(v1.kaohe_kind)
-                                kscoreList.append(v1.kaohe_score)
-                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList, 'info': info}})
+                            deletedRulesView = getEditedRules(name, editkaoheName = editkaoheName)
+                            deletedRulesData = deletedRulesView.getDeledRulesData()
+                            return render(request, 'Kpi/showkaoherulesinfo.html', deletedRulesData)
                         if action == "编辑":
                             editkaoheName = request.POST.get('editkaohename')
                             request.session['editkaohename'] = editkaoheName
-                            info = '正在编辑考核规则：' + editkaoheName
-                            qkh = kh.objects.all()
-                            print(qkh, type(qkh))
-                            knameList = []
-                            kKindList = []
-                            kscoreList = []
-                            for v1 in qkh:
-                                knameList.append(v1.kaohe_name)
-                                kKindList.append(v1.kaohe_kind)
-                                kscoreList.append(v1.kaohe_score)
-                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList, 'info': info, 'editkaohename': editkaoheName}})
+                            editedKaoheRulesView = getEditedRules(name, editkaoheName = editkaoheName)
+                            editedKaoheRulesData = editedKaoheRulesView.getEditedRulesData()
+                            return render(request, 'Kpi/showkaoherulesinfo.html', editedKaoheRulesData)
                         if action == "保存":
                             savekind = request.POST.get('kaohe_kind')
                             savename = request.POST.get('kaohe_name')
                             savekaoheScore = request.POST.get('kaohe_score')
-                            try:
-                                qKaoHeName = kh.objects.get( kaohe_name = savename ).kaohe_name         #考核规则kaohe_name去重
-                                print(qKaoHeName)
-                                testKaoheRules = kh.objects.filter( kaohe_name = savename ).filter( kaohe_score = savekaoheScore).filter( kaohe_kind = savekind)
-                                print(testKaoheRules)
-                                try:
-                                    testKaoheRules[0]
-                                    info = '考核规则：{} 未更改！'.format(savename)
-                                    print(info)
-                                    qkh = kh.objects.all()
-                                    print(qkh, type(qkh))
-                                    knameList = []
-                                    kKindList = []
-                                    kscoreList = []
-                                    for v1 in qkh:
-                                        knameList.append(v1.kaohe_name)
-                                        kKindList.append(v1.kaohe_kind)
-                                        kscoreList.append(v1.kaohe_score)
-                                        print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                                    kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                                    return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                                except:
-                                    try:
-                                        edkhname = request.session['editkaohename']
-                                        ks = kh.objects.get( kaohe_name = edkhname )
-                                        if edkhname != savename and savename == kh.objects.get( kaohe_name = savename ).kaohe_name:    # （确保考核名称唯一性）如果编辑的考核名称和保存的考核名称不相同且保存的考核名称与数据库里的有重名，则重新编辑
-                                            info = '考核规则：{} 已存在！请重新编辑 {} ！'.format(savename, edkhname)
-                                            print(info)
-                                            qkh = kh.objects.all()
-                                            print(qkh, type(qkh))
-                                            knameList = []
-                                            kKindList = []
-                                            kscoreList = []
-                                            for v1 in qkh:
-                                                knameList.append(v1.kaohe_name)
-                                                kKindList.append(v1.kaohe_kind)
-                                                kscoreList.append(v1.kaohe_score)
-                                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                                        else:
-                                            if savekaoheScore == '' or savekaoheScore == 'None':
-                                                ks.kaohe_kind = savekind
-                                                ks.kaohe_score = None
-                                                ks.save()
-                                                scpre = sc.objects.filter( score_kind = savename )
-                                                for v in scpre:
-                                                    v.score_pre = None        # 同时更新员工考核事项里的该考核名称工时
-                                                    v.save()
-                                                    print(v.score_pre)                                                
-                                            else:
-                                                ks.kaohe_kind = savekind
-                                                ks.kaohe_score = int(savekaoheScore)
-                                                ks.save()
-                                                scpre = sc.objects.filter( score_kind = savename )
-                                                for v in scpre:
-                                                    v.score_pre = int(savekaoheScore)          # 同时更新员工考核事项里的该考核名称工时
-                                                    v.save()
-                                            info = '考核规则：{} 已更改！'.format(savename)
-                                            print(info)
-                                            qkh = kh.objects.all()
-                                            print(qkh, type(qkh))
-                                            knameList = []
-                                            kKindList = []
-                                            kscoreList = []
-                                            for v1 in qkh:
-                                                knameList.append(v1.kaohe_name)
-                                                kKindList.append(v1.kaohe_kind)
-                                                kscoreList.append(v1.kaohe_score)
-                                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                                    except:
-                                        pass
-                            except:
-                                edkhname = request.session['editkaohename']
-                                try:
-                                    ks = kh.objects.get( kaohe_name = edkhname )
-                                    if savekaoheScore == '' or savekaoheScore == 'None':
-                                                ks.kaohe_kind = savekind
-                                                ks.kaohe_score = None
-                                                ks.save()
-                                                scpre = sc.objects.filter( score_kind = edkhname )
-                                                for v in scpre:
-                                                    v.score_pre = None        # 同时更新员工考核事项里的该考核名称工时
-                                                    v.save()
-                                                    print(v.score_pre)                                                
-                                    else:
-                                        ks.kaohe_kind = savekind
-                                        ks.kaohe_score = int(savekaoheScore)
-                                        ks.save()
-                                        scpre = sc.objects.filter( score_kind = edkhname )
-                                        for v in scpre:
-                                            v.score_pre = int(savekaoheScore)        # 同时更新员工考核事项里的该考核名称工时
-                                            v.save()
-                                            print(v.score_pre)                
-                                    info = '考核规则：' + savename + '  已保存'
-                                    print(info)
-                                    try:
-                                        qkh = kh.objects.all()
-                                        print(qkh, type(qkh))
-                                        knameList = []
-                                        kKindList = []
-                                        kscoreList = []
-                                        for v1 in qkh:
-                                            knameList.append(v1.kaohe_name)
-                                            kKindList.append(v1.kaohe_kind)
-                                            kscoreList.append(v1.kaohe_score)
-                                            print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                                        kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                                        return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'info': info, 'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList}})
-                                    except:
-                                        pass
-                                except:
-                                    pass
+                            edkhname = request.session['editkaohename']
+                            savedKaoheRulesView = getEditedRules(name, kind = savekind, kaoheName = savename, kaoheScore = savekaoheScore, editkaoheName = edkhname)
+                            savedKaoheRulesData = savedKaoheRulesView.getSavedRulesData()
+                            return render(request, 'Kpi/showkaoherulesinfo.html', savedKaoheRulesData)
                     except:
-                        info = '未勾选考核规则！'
-                        try:
-                            qkh = kh.objects.all()
-                            print(qkh, type(qkh))
-                            knameList = []
-                            kKindList = []
-                            kscoreList = []
-                            for v1 in qkh:
-                                knameList.append(v1.kaohe_name)
-                                kKindList.append(v1.kaohe_kind)
-                                kscoreList.append(v1.kaohe_score)
-                                print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                            kaoherulesinfoList = zip(knameList, kKindList, kscoreList)
-                            return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'kaoherulesinfoList': kaoherulesinfoList, 'info': info}})
-                        except:
-                            pass
-                else:
-                    info = '该部门还没有考核规则'
-                    return render(request, 'Kpi/showkaoherulesinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info}})
+                        pass
+                else:    #该部门无考核规则
+                    kpiInfoView = getKpiRules(name)
+                    kpiInfoData = kpiInfoView.getKpiRulesData()
+                    return render(request, 'Kpi/showkaoherulesinfo.html', kpiInfoData)
             except:
                 pass
 
@@ -1106,126 +348,37 @@ def managerkaohe(request):
         if request.method == "GET":
             try:
                 name = request.session['username']
-                q = ui.objects.get( user_name = name )
-                department = q.user_department
-                roles = q.user_role
-                test = sc.objects.filter( score_user = name).exists()
-                if roles == 'manager': 
-                    if test:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(v1.id)
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                            # print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                    else:
-                        kaohenameKindList = []
-                        info = '还没有考核事项'
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohenameKindList': kaohenameKindList}})
+                getUserScoresViews = getUserScore(name)
+                print(name)
+                getUserScoresData = getUserScoresViews.getUserScoreData()
+                print(getUserScoresData)
+                if getUserScoresData['userinfo']['roles'] == 'manager':
+                    return render(request, 'Kpi/showmanagerkaoheinfo.html', getUserScoresData)
                 else:
-                    if test:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(v1.id)
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                            # print(v1.kaohe_name, v1.kaohe_department, v1.kaohe_kind, v1.kaohe_score)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                    else:
-                        kaohenameKindList = []
-                        info = '还没有考核事项'
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohenameKindList': kaohenameKindList}})
+                    return render(request, 'Kpi/showkaoheinfo.html', getUserScoresData)
             except:
                 pass
+
+
 
 def AddEvent(request):
     if request.session.get('is_login',None):
         if request.method == "POST":
             try:
                 name = request.session['username']
-                q = ui.objects.get( user_name = name )
-                department = q.user_department
                 action = request.POST.get('action')
-                roles = q.user_role
                 if action == "新增":
                     eventTime = request.POST.get('date')
-                    eventdate = datetime.strptime(eventTime, '%Y-%m-%d')
-                    print(eventdate, type(eventdate))                                                      
-                    events = request.POST.get('events')
-                    print(events, type(events))                     
+                    requireDepartment = request.POST.get('requirement_department')
+                    requireUsername = request.POST.get('requirement_username')                                                    
+                    events = request.POST.get('events')                   
                     kind = request.POST.get('kind')
-                    print(kind, type(kind))
-                    pre = kh.objects.get( kaohe_name = kind ).kaohe_score
-                    print(pre, type(pre))
-                    if pre == None:
-                        s = sc(score_user = name, score_datetime = eventdate, score_events = events, score_kind = kind)
-                        s.save()
+                    UserAddedScoreViews = getAddedUserScore(name , eventTime = eventTime, events = events, kind = kind, requireDepartment = requireDepartment, requireUsername = requireUsername)
+                    UserAddedScoreData = UserAddedScoreViews.getAddedUserScoreData()
+                    if UserAddedScoreData['userinfo']['roles'] == 'manager':
+                        return render(request, 'Kpi/showmanagerkaoheinfo.html', UserAddedScoreData)
                     else:
-                        s = sc(score_user = name, score_datetime = eventdate, score_events = events, score_kind = kind, score_pre = pre)
-                        s.save()
-                    info = '新增考核事项：' + events + '成功'
-                    print(info)
-                    try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(v1.id)
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        if roles == 'manager':
-                            return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                        else:
-                            return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                    except:
-                        pass
+                        return render(request, 'Kpi/showkaoheinfo.html', UserAddedScoreData)
             except:
                 pass
 
@@ -1234,160 +387,49 @@ def Editevents(request):
         if request.method == "POST":
             try:
                 name = request.session['username']
-                q = ui.objects.get( user_name = name )
-                department = q.user_department
                 action = request.POST.get('action')
-                roles = q.user_role
                 if action == '更新':
                     Editscoreid = request.POST.get('editscoreid')
-                    print(Editscoreid, type(Editscoreid))
                     Editpre = request.POST.get('editpre')
-                    print(Editpre, type(Editpre))
-                    escpre = sc.objects.get(id = Editscoreid)
-                    if Editpre == '':
-                        info = ''
-                        pass
+                    updatedUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid, Editpre = Editpre)
+                    updatedUserScoreData = updatedUserScoreView.getUpdatedUserScore()
+                    if updatedUserScoreData['userinfo']['roles'] == 'manager':
+                        return render(request, 'Kpi/showmanagerkaoheinfo.html', updatedUserScoreData)
                     else:
-                        escpre.score_pre = int(Editpre)
-                        escpre.save()
-                        info = '自定义考核时长更新成功'
-                    print(info)
-                    try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(v1.id)
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        if roles == 'manager':
-                            return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                        else:
-                            return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                    except:
-                        pass
+                        return render(request, 'Kpi/showkaoheinfo.html', updatedUserScoreData)
                 if action == '删除':
                     Editscoreid = request.POST.get('editscoreid')
-                    print(Editscoreid, type(Editscoreid))
-                    sq = sc.objects.get( id = Editscoreid)
-                    sq.delete()
-                    info = '考核事项已删除'
-                    print(info)
-                    try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(v1.id)
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        if roles == 'manager':
-                            return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                        else:
-                            return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                    except:
-                        pass
+                    deledUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid)
+                    deledUserScoreData = deledUserScoreView.getDeledUserScore()
+                    if deledUserScoreData['userinfo']['roles'] == 'manager':
+                        return render(request, 'Kpi/showmanagerkaoheinfo.html', deledUserScoreData)
+                    else:
+                        return render(request, 'Kpi/showkaoheinfo.html', deledUserScoreData)
                 if action == '编辑':
                     editscoreid = request.POST.get('editscoreid')
-                    print(editscoreid, type(editscoreid))
                     request.session['editscoreid'] = editscoreid
-                    info = '正在编辑考核事项'
-                    try:
-                        qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                        print(qsc, type(qsc))
-                        # print(test)
-                        scidList = []
-                        scdateList = []
-                        sceventsList = []
-                        sckindList = []
-                        scpreList = []
-                        for v1 in qsc:
-                            scidList.append(str(v1.id))          # 数据库中的主键id是'int'类型
-                            scdateList.append(v1.score_datetime)
-                            sceventsList.append(v1.score_events)
-                            sckindList.append(v1.score_kind)
-                            scpreList.append(v1.score_pre)
-                        kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                        kaohenameKindList = []
-                        qkhname = kh.objects.filter( kaohe_department = department )
-                        for v2 in qkhname:
-                            kaohenameKindList.append(v2.kaohe_name)
-                        if roles == 'manager':
-                            return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList, 'editscoreid': editscoreid}})
-                        else:
-                            return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList, 'editscoreid': editscoreid}})
-                    except:
-                        pass
+                    editingUserScoreView = getEditedUserScore(name, Editscoreid = editscoreid)
+                    editingUserScoreData = editingUserScoreView.getEditingUserScore()
+                    if editingUserScoreData['userinfo']['roles'] == 'manager':
+                        return render(request, 'Kpi/showmanagerkaoheinfo.html', editingUserScoreData)
+                    else:
+                        return render(request, 'Kpi/showkaoheinfo.html', editingUserScoreData)
                 if action == '保存':
                     saveTime = request.POST.get('date')
-                    saveDate = datetime.strptime(saveTime, '%Y-%m-%d')
+                    saveid = request.session['editscoreid']
                     saveEvents = request.POST.get('events')
                     saveNamekind = request.POST.get('kind')
-                    savePre = kh.objects.get( kaohe_name = saveNamekind ).kaohe_score
-                    try:
-                        saveid = request.session['editscoreid']
-                        print(saveid, type(saveid)) 
-                        savesc = sc.objects.get( id = saveid )
-                        savesc.score_datetime = saveDate
-                        savesc.score_events = saveEvents
-                        savesc.score_kind = saveNamekind
-                        savesc.score_pre = savePre
-                        savesc.save()
-                        info = '考核事项已更改！'
-                        try:
-                            qsc = sc.objects.filter( score_user = name ).order_by( '-score_datetime' )
-                            print(qsc, type(qsc))
-                            # print(test)
-                            scidList = []
-                            scdateList = []
-                            sceventsList = []
-                            sckindList = []
-                            scpreList = []
-                            for v1 in qsc:
-                                scidList.append(v1.id)
-                                scdateList.append(v1.score_datetime)
-                                sceventsList.append(v1.score_events)
-                                sckindList.append(v1.score_kind)
-                                scpreList.append(v1.score_pre)
-                            kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList)
-                            kaohenameKindList = []
-                            qkhname = kh.objects.filter( kaohe_department = department )
-                            for v2 in qkhname:
-                                kaohenameKindList.append(v2.kaohe_name)
-                            if roles == 'manager':
-                                return render(request, 'Kpi/showmanagerkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                            else:
-                                return render(request, 'Kpi/showkaoheinfo.html', {'userinfo': {'name': name, 'department': department, 'info': info, 'kaohescoresinfoList': kaohescoresinfoList, 'kaohenameKindList': kaohenameKindList}})
-                        except:
-                            pass
-                    except:
-                        pass
+                    saveReqDepartment = request.POST.get('requirement_department')
+                    saveReqUsername = request.POST.get('requirement_username')
+                    savedUserScoreView = getEditedUserScore(name, Editscoreid = saveid, saveTime = saveTime, events = saveEvents, kind = saveNamekind, requireDepartment = saveReqDepartment, requireUsername = saveReqUsername)
+                    savedUserScoreData = savedUserScoreView.getSavedUserScore()
+                    if savedUserScoreData['userinfo']['roles'] == 'manager':
+                        return render(request, 'Kpi/showmanagerkaoheinfo.html', savedUserScoreData)
+                    else:
+                        return render(request, 'Kpi/showkaoheinfo.html', savedUserScoreData)
             except:
                 pass
+
 
 def Manage(request):
     if request.session.get('is_login',None):
