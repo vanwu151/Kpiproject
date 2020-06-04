@@ -358,13 +358,22 @@ class getUserScore:
                                  'kaohenameKindList': kaohenameKindList}}
             else:
                 kaohenameKindList = []
+                kaohescoresinfoList = []
                 info = '还没有考核事项'
-                qkhname = kh.objects.filter( kaohe_department = department )
-                for v2 in qkhname:
-                    kaohenameKindList.append(v2.kaohe_name)
+                try:
+                    qkhname = kh.objects.filter( kaohe_department = department )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                except:
+                    pass
+                UserScoreData = {'userinfo': {'name': self.name,
+                                 'roles': roles, 
+                                 'department': department, 
+                                 'kaohescoresinfoList': kaohescoresinfoList, 
+                                 'kaohenameKindList': kaohenameKindList}}
                 UserScoreData['userinfo']['info'] = info
+                print(UserScoreData)
         except:
-            print('here2')
             pass
         return UserScoreData
 
