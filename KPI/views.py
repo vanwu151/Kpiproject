@@ -346,9 +346,11 @@ def EditRules(request):
 def managerkaohe(request):
     if request.session.get('is_login',None):
         if request.method == "GET":
+            todayYear  = datetime.today().strftime('%Y')         #格式化str格式输出今天是几年
+            todayMonth = datetime.today().strftime('%m')         #格式化str格式输出今天是几月
             try:
                 name = request.session['username']
-                getUserScoresViews = getUserScore(name)
+                getUserScoresViews = getUserScore(name, todayYear = todayYear, todayMonth = todayMonth)
                 print(name)
                 getUserScoresData = getUserScoresViews.getUserScoreData()
                 print(getUserScoresData)
@@ -364,6 +366,8 @@ def managerkaohe(request):
 def AddEvent(request):
     if request.session.get('is_login',None):
         if request.method == "POST":
+            todayYear  = datetime.today().strftime('%Y')         #格式化str格式输出今天是几年
+            todayMonth = datetime.today().strftime('%m')         #格式化str格式输出今天是几月
             try:
                 name = request.session['username']
                 action = request.POST.get('action')
@@ -373,7 +377,7 @@ def AddEvent(request):
                     requireUsername = request.POST.get('requirement_username')                                                    
                     events = request.POST.get('events')                   
                     kind = request.POST.get('kind')
-                    UserAddedScoreViews = getAddedUserScore(name , eventTime = eventTime, events = events, kind = kind, requireDepartment = requireDepartment, requireUsername = requireUsername)
+                    UserAddedScoreViews = getAddedUserScore(name , eventTime = eventTime, events = events, kind = kind, requireDepartment = requireDepartment, requireUsername = requireUsername, todayYear = todayYear, todayMonth = todayMonth)
                     UserAddedScoreData = UserAddedScoreViews.getAddedUserScoreData()
                     if UserAddedScoreData['userinfo']['roles'] == 'manager':
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', UserAddedScoreData)
@@ -385,13 +389,15 @@ def AddEvent(request):
 def Editevents(request):
     if request.session.get('is_login',None):
         if request.method == "POST":
+            todayYear  = datetime.today().strftime('%Y')         #格式化str格式输出今天是几年
+            todayMonth = datetime.today().strftime('%m')         #格式化str格式输出今天是几月
             try:
                 name = request.session['username']
                 action = request.POST.get('action')
                 if action == '更新':
                     Editscoreid = request.POST.get('editscoreid')
                     Editpre = request.POST.get('editpre')
-                    updatedUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid, Editpre = Editpre)
+                    updatedUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid, Editpre = Editpre, todayYear = todayYear, todayMonth = todayMonth)
                     updatedUserScoreData = updatedUserScoreView.getUpdatedUserScore()
                     if updatedUserScoreData['userinfo']['roles'] == 'manager':
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', updatedUserScoreData)
@@ -399,7 +405,7 @@ def Editevents(request):
                         return render(request, 'Kpi/showkaoheinfo.html', updatedUserScoreData)
                 if action == '删除':
                     Editscoreid = request.POST.get('editscoreid')
-                    deledUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid)
+                    deledUserScoreView = getEditedUserScore(name, Editscoreid = Editscoreid, todayYear = todayYear, todayMonth = todayMonth)
                     deledUserScoreData = deledUserScoreView.getDeledUserScore()
                     if deledUserScoreData['userinfo']['roles'] == 'manager':
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', deledUserScoreData)
@@ -408,7 +414,7 @@ def Editevents(request):
                 if action == '编辑':
                     editscoreid = request.POST.get('editscoreid')
                     request.session['editscoreid'] = editscoreid
-                    editingUserScoreView = getEditedUserScore(name, Editscoreid = editscoreid)
+                    editingUserScoreView = getEditedUserScore(name, Editscoreid = editscoreid, todayYear = todayYear, todayMonth = todayMonth)
                     editingUserScoreData = editingUserScoreView.getEditingUserScore()
                     if editingUserScoreData['userinfo']['roles'] == 'manager':
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', editingUserScoreData)
@@ -421,7 +427,7 @@ def Editevents(request):
                     saveNamekind = request.POST.get('kind')
                     saveReqDepartment = request.POST.get('requirement_department')
                     saveReqUsername = request.POST.get('requirement_username')
-                    savedUserScoreView = getEditedUserScore(name, Editscoreid = saveid, saveTime = saveTime, events = saveEvents, kind = saveNamekind, requireDepartment = saveReqDepartment, requireUsername = saveReqUsername)
+                    savedUserScoreView = getEditedUserScore(name, Editscoreid = saveid, saveTime = saveTime, events = saveEvents, kind = saveNamekind, requireDepartment = saveReqDepartment, requireUsername = saveReqUsername, todayYear = todayYear, todayMonth = todayMonth)
                     savedUserScoreData = savedUserScoreView.getSavedUserScore()
                     if savedUserScoreData['userinfo']['roles'] == 'manager':
                         return render(request, 'Kpi/showmanagerkaoheinfo.html', savedUserScoreData)

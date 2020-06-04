@@ -322,15 +322,17 @@ class getUserScore:
     """
     def __init__(self, name, **kwds):
         self.name = name
+        self.todayMonth = kwds['todayMonth']
+        self.todayYear = kwds['todayYear']
 
     def getUserScoreData(self):
         try:
             q = ui.objects.get( user_name = self.name )
             department = q.user_department
             roles = q.user_role
-            test = sc.objects.filter( score_user = self.name).exists()
+            test = sc.objects.filter( score_user = self.name).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).exists()
             if test:
-                qsc = sc.objects.filter( score_user = self.name ).order_by( '-score_datetime' )
+                qsc = sc.objects.filter( score_user = self.name ).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).order_by( '-score_datetime' )
                 scidList = []
                 scdateList = []
                 sceventsList = []
@@ -359,7 +361,7 @@ class getUserScore:
             else:
                 kaohenameKindList = []
                 kaohescoresinfoList = []
-                info = '还没有考核事项'
+                info = '当月还没有考核事项'
                 try:
                     qkhname = kh.objects.filter( kaohe_department = department )
                     for v2 in qkhname:
@@ -384,12 +386,13 @@ class getAddedUserScore(getUserScore):
 
     """
     def __init__(self, name, **kwds):
-        getUserScore.__init__(self, name)
+        getUserScore.__init__(self, name, todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'])
         self.eventTime = kwds['eventTime']
         self.events = kwds['events']
         self.kind = kwds['kind']
         self.requireDepartment = kwds['requireDepartment']
         self.requireUsername = kwds['requireUsername']
+
 
     def getAddedUserScoreData(self):
         eventdate = datetime.strptime(self.eventTime, '%Y-%m-%d')
@@ -404,9 +407,10 @@ class getAddedUserScore(getUserScore):
             s = sc(score_user = self.name, score_datetime = eventdate, score_events = self.events, score_kind = self.kind, score_pre = pre, score_require_department = self.requireDepartment, score_require_username = self.requireUsername)
             s.save()
         info = '新增考核事项：' + self.events + '成功'
-        getAddedUserScoreView = getUserScore(self.name)
+        getAddedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getAddedUserScoreData = getAddedUserScoreView.getUserScoreData()
         getAddedUserScoreData['userinfo']['info'] = info
+        print(getAddedUserScoreData)
         return getAddedUserScoreData
 
 
@@ -416,7 +420,7 @@ class getEditedUserScore(getUserScore):
 
     """
     def __init__(self, name, **kwds):
-        getUserScore.__init__(self, name)
+        getUserScore.__init__(self, name, todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'])
         try:
             self.Editscoreid = kwds['Editscoreid']
         except:
@@ -460,7 +464,7 @@ class getEditedUserScore(getUserScore):
             escpre.score_pre = int(Editpre)
             escpre.save()
             info = '自定义考核时长更新成功'
-        getUpdatedUserScoreView = getUserScore(self.name)
+        getUpdatedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getUpdatedUserScoreData = getUpdatedUserScoreView.getUserScoreData()
         getUpdatedUserScoreData['userinfo']['info'] = info
         return getUpdatedUserScoreData
@@ -472,7 +476,7 @@ class getEditedUserScore(getUserScore):
         except:
             pass
         info = '考核事项已删除'
-        getDeledUserScoreView = getUserScore(self.name)
+        getDeledUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getDeledUserScoreData = getDeledUserScoreView.getUserScoreData()
         getDeledUserScoreData['userinfo']['info'] = info
         return getDeledUserScoreData
@@ -480,7 +484,7 @@ class getEditedUserScore(getUserScore):
     def getEditingUserScore(self):
         info = '正在编辑考核事项'
         editscoreid = self.Editscoreid
-        getEditingUserScoreView = getUserScore(self.name)
+        getEditingUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getEditingUserScoreData = getEditingUserScoreView.getUserScoreData()
         getEditingUserScoreData['userinfo']['info'] = info
         getEditingUserScoreData['userinfo']['editscoreid'] = int(editscoreid)   # 数据库中的主键id是'int'类型
@@ -507,7 +511,7 @@ class getEditedUserScore(getUserScore):
         except:
             pass
         info = '考核事项已更改！'
-        getSavedUserScoreView = getUserScore(self.name)
+        getSavedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getSavedUserScoreData = getSavedUserScoreView.getUserScoreData()
         getSavedUserScoreData['userinfo']['info'] = info
         return getSavedUserScoreData
