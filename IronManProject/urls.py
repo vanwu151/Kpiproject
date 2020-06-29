@@ -44,6 +44,7 @@ urlpatterns = [
     path('InfoModed/', views.InfoModed),
     path('Manage/', views.Manage),
     path('admin/', admin.site.urls),
+    path('PageFunc/', views.PageFunc),
     url(r'^static/(?P<path>.*)$', static.serve,
         {'document_root': settings.STATIC_ROOT}, name='static'),    
 ]

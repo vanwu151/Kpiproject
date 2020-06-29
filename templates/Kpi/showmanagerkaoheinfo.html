@@ -24,6 +24,7 @@
     
     <link href="/static/Kpi/css/sweetalert.css" rel="stylesheet">
     <script src="/static/Kpi/js/sweetalert.min.js"></script>
+    <!-- <script type="text/javascript" src="/static/Kpi/js/pagination.js"></script> -->
 
 </head>
 
@@ -135,18 +136,36 @@
                                     <div class="text-left">
                                         <table class="table">
                                             <div id="user_assets_table_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
-                                                <div id="uc" class="pull-left"></div>
-                                                <div id="user_assets_table_filter" class="dataTables_filter">
-                                                <label>搜索<input type="search" class="form-control input-sm" placeholder="" aria-controls="user_assets_table"></label>
-                                                </div>
-                                                <div class="dataTables_length" id="user_assets_table_length">
-                                                <label>每页  <select name="user_assets_table_length" aria-controls="user_assets_table" class="form-control input-sm">
-                                                <option value="10">10</option><option value="15">15</option>
-                                                <option value="25">25</option><option value="50">50</option>
-                                                <option value="-1">All</option>
-                                                </select>
-                                                </label>
-                                                </div>
+                                                <div id="uc" class="pull-left"></div>                
+                                                <form action="/PageFunc/" method="POST" enctype="multipart/form-data" id="PageFunc" name="PageFunc">
+                                                    <!-- <div id="user_assets_table_filter" class="dataTables_filter">                        
+                                                        <label>搜索<input type="search" class="form-control input-sm" placeholder="" aria-controls="user_assets_table"></label>
+                                                    </div> -->
+                                                    <div class="dataTables_length" id="PageLength">
+                                                        <label>
+                                                            每页                                                                
+                                                                <select name="PageLength" aria-controls="user_assets_table" class="form-control input-sm" onchange="javascript:submitForm()">
+                                                                    <option value="10" {% if 10  == userinfo.pageSep %} selected {% endif %}>
+                                                                        10
+                                                                    </option>
+                                                                    <option value="15" {% if 15  == userinfo.pageSep %} selected {% endif %}>
+                                                                        15
+                                                                    </option>
+                                                                    <option value="30" {% if 30  == userinfo.pageSep %} selected {% endif %}>
+                                                                        30
+                                                                    </option>
+                                                                    <option value="50" {% if 50  == userinfo.pageSep %} selected {% endif %}>
+                                                                        50
+                                                                    </option>
+                                                                </select>
+                                                        </label>                                                                                    
+                                                    </div>
+                                                </form>
+                                                <script type="text/javascript">
+                                                    function submitForm(){
+                                                        document.forms["PageFunc"].submit();
+                                                    }
+                                                </script>           
                                                 <table class="table table-striped table-bordered table-hover  dataTable no-footer" id="user_assets_table" style="width: 100%;" role="grid" aria-describedby="user_assets_table_info">
                                                     <thead>
                                                         <tr role="row">
@@ -178,7 +197,6 @@
                                                                         <option value="总经办" >总经办</option>
                                                                         <option value="董事会" >董事会</option>
                                                                         <option value="行政部" >行政部</option>
-																		<option value="商企部" >商企部</option>
                                                                     </select>
                                                                 </td>
                                                                 <td class=" text-center"><input type="text" name="requirement_username" required="" style="width: 65px;"></td>
@@ -197,13 +215,13 @@
                                                             </tr>
                                                         </tbody>
                                                     </form>
-                                                    {% for scoreid, datetime, events, kind, pre, reqdepartment, requsername in userinfo.kaohescoresinfoList %}
-                                                        {% if scoreid == userinfo.editscoreid %}
+                                                    {% for m in userinfo.page.object_list %}
+                                                        {% if m.id == userinfo.editscoreid %}
                                                             {{ userinfo.editscoreid }}
                                                             <form action="/Editevents/" method="POST" enctype="multipart/form-data">
                                                                 <tbody>
                                                                     <tr role="row" class="odd">
-                                                                        <td class=" text-center"><input type="date" name="date" value='{{ datetime|date:"Y-m-d" }}' required="" style="width: 125px;"></td>
+                                                                        <td class=" text-center"><input type="date" name="date" value='{{ m.score_datetime|date:"Y-m-d" }}' required="" style="width: 125px;"></td>
                                                                         <td class=" text-center">
                                                                             <select name="requirement_department" required="" style="width: 90px;">                                                                            
                                                                                 <option value="客服部" >客服部</option>
@@ -219,19 +237,18 @@
                                                                                 <option value="总经办" >总经办</option>
                                                                                 <option value="董事会" >董事会</option>
                                                                                 <option value="行政部" >行政部</option>
-																				<option value="商企部" >商企部</option>
                                                                             </select>
                                                                         </td>
-                                                                        <td class=" text-center"><input type="text" name="requirement_username" value='{{ requsername }}' required="" style="width: 65px;"></td>
-                                                                        <td class=" text-center"><input type="text" name="events" value='{{ events }}' required="" style="width: 220px;"></td>
+                                                                        <td class=" text-center"><input type="text" name="requirement_username" value='{{ m.score_require_username }}' required="" style="width: 65px;"></td>
+                                                                        <td class=" text-center"><input type="text" name="events" value='{{ m.score_events }}' required="" style="width: 220px;"></td>
                                                                         <td class=" text-center">
                                                                             <select name="kind" required="" style="width: 180px;">
                                                                                 {% for kaohenameKind in userinfo.kaohenameKindList %}                                                                           
-                                                                                    <option value="{{ kaohenameKind }}" {% if kaohenameKind  == kind %} selected {% endif %}>{{ kaohenameKind }}</option>
+                                                                                    <option value="{{ kaohenameKind }}" {% if kaohenameKind  == m.score_kind %} selected {% endif %}>{{ kaohenameKind }}</option>
                                                                                 {% endfor %}
                                                                             </select>
                                                                         </td>
-                                                                        <td class=" text-center"><input type="text" hidden name="pre_score" value='{{ pre }}' style="width: 70px;">{{ pre }}</td>
+                                                                        <td class=" text-center"><input type="text" hidden name="pre_score" value='{{ m.score_pre }}' style="width: 70px;">{{ m.score_pre }}</td>
                                                                         <td class=" text-center">
                                                                             <input type="submit" class="btn btn-xs btn-info" name="action" value="保存"/>
                                                                         </td>
@@ -242,21 +259,21 @@
                                                             <form action="/Editevents/" method="POST" enctype="multipart/form-data">
                                                                 <tbody>
                                                                     <tr role="row" class="odd">
-                                                                        <td class=" text-center" ><input type="text"  hidden name="editscoreid" value="{{ scoreid }}"/>&emsp;{{ datetime|date:"Y-m-d" }}</td>
+                                                                        <td class=" text-center" ><input type="text"  hidden name="editscoreid" value="{{ m.id }}"/>&emsp;{{ m.score_datetime|date:"Y-m-d" }}</td>
                                                                         <!-- <td class=" text-center"><input type="date" name="date" value='{{ datetime }}'  required="" style="width: 130px;"></td> -->
-                                                                        <td class=" text-center">{{ reqdepartment }}</td>
-                                                                        <td class=" text-center">{{ requsername }}</td>
-                                                                        <td class=" text-center" >{{ events }}</td>
-                                                                        <td class=" text-center" >{{ kind }}</td>
-                                                                        {% if pre == None %}
+                                                                        <td class=" text-center">{{ m.score_require_department }}</td>
+                                                                        <td class=" text-center">{{ m.score_require_username }}</td>
+                                                                        <td class=" text-center" >{{ m.score_events }}</td>
+                                                                        <td class=" text-center" >{{ m.score_kind }}</td>
+                                                                        {% if m.score_pre == None %}
                                                                         <td class=" text-center" >
-                                                                            <input type="text"  hidden name="editscoreid" value="{{ scoreid }}"/>
+                                                                            <input type="text"  hidden name="editscoreid" value="{{ m.id }}"/>
                                                                             <input type="text" name="editpre" placeholder="自定义时间"  style="width: 70px;"/>
                                                                             <!-- &emsp; -->
                                                                             <input type="submit" class="btn btn-xs btn-info" name="action" value="更新"/>
                                                                         </td>
                                                                         {% else %}
-                                                                            <td class=" text-center" >{{ pre }}</td>
+                                                                            <td class=" text-center" >{{ m.score_pre }}</td>
                                                                         {% endif %}   
                                                                         <td class=" text-center" >
                                                                             <input type="submit" class="btn btn-xs btn-info" name="action" value="编辑"/>
@@ -269,6 +286,44 @@
                                                         {% endif %}    
                                                     {% endfor %}
                                                 </table>
+                                                <ul class="pagination">
+                                                    {# 如果当前页还有上一页 #}
+                                                    {% if userinfo.page.has_previous %}
+                                                        <li>
+                                                            {# 点击a标签，跳转到上一页链接 ?index  为地址后面拼接的参数 #}
+                                                            <a href="/managerkaohe/?index={{userinfo.page.previous_page_number}}">上一页</a>
+                                                        </li>
+                                                    {% else %}
+                                                        {# 如果没有上一页， 则上一页按钮不可点击 #}
+                                                        <li class="disabled">
+                                                            <a href="#">上一页</a>
+                                                        </li>
+                                                    {% endif %}
+                                            
+                                                    {% for page_number in userinfo.paginator.page_range %}
+                                                        {# 获取当前页的页码 #}
+                                                        {% if page_number == userinfo.page.number %}
+                                                            {# 如果是当前页的话，选中 #}
+                                                            <li class="active">
+                                                                <a href="/managerkaohe/?index={{page_number}}">{{page_number}}</a>
+                                                            </li>
+                                                        {% else %}
+                                                            <li>
+                                                                <a href="/managerkaohe/?index={{page_number}}">{{page_number}}</a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                            
+                                                    {% if userinfo.page.has_next %}
+                                                        <li>
+                                                            <a href="/managerkaohe/?index={{userinfo.page.next_page_number}}">下一页</a>
+                                                        </li>
+                                                    {% else %}
+                                                    <li class="disabled">
+                                                        <a href="#">下一页</a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
                                         </table>
                                     </div>
                                 </div>

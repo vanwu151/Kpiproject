@@ -5,6 +5,7 @@ from django.shortcuts import render, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Sum
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import userinfo as ui
 from .models import kaohe as kh
 from .models import score as sc
@@ -322,8 +323,10 @@ class getUserScore:
     """
     def __init__(self, name, **kwds):
         self.name = name
+        self.pageSep = kwds['pageSep']
         self.todayMonth = kwds['todayMonth']
         self.todayYear = kwds['todayYear']
+        self.num = kwds['num']
 
     def getUserScoreData(self):
         try:
@@ -333,22 +336,22 @@ class getUserScore:
             test = sc.objects.filter( score_user = self.name).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).exists()
             if test:
                 qsc = sc.objects.filter( score_user = self.name ).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).order_by( '-score_datetime' )
-                scidList = []
-                scdateList = []
-                sceventsList = []
-                sckindList = []
-                scpreList = []
-                screquiredepartmentlist = []
-                screquireusernamelist = []
-                for v1 in qsc:
-                    scidList.append(v1.id)
-                    scdateList.append(v1.score_datetime)
-                    sceventsList.append(v1.score_events)
-                    sckindList.append(v1.score_kind)
-                    scpreList.append(v1.score_pre)
-                    screquiredepartmentlist.append(v1.score_require_department)
-                    screquireusernamelist.append(v1.score_require_username)
-                kaohescoresinfoList = zip(scidList, scdateList, sceventsList, sckindList, scpreList, screquiredepartmentlist, screquireusernamelist)
+                paginator = Paginator(qsc, self.pageSep, 3) #分页器 
+                print(paginator.count)
+                # 值1：所有的数据
+                # 值2：每一页的数据
+                # 值3：当最后一页数据少于n条，将数据并入上一页
+                try:
+                    # 获取第几页
+                    print('num', self.num)
+                    number = paginator.page(self.num)
+                    print(number.object_list)
+                    
+                except PageNotAnInteger:
+                    # 如果输入的页码数不是整数，那么显示第一页数据
+                    number = paginator.page(1)
+                except EmptyPage:
+                    number = paginator.page(paginator.num_pages)
                 kaohenameKindList = []
                 qkhname = kh.objects.filter( kaohe_department = department )
                 for v2 in qkhname:
@@ -356,11 +359,25 @@ class getUserScore:
                 UserScoreData = {'userinfo': {'name': self.name,
                                  'roles': roles, 
                                  'department': department, 
-                                 'kaohescoresinfoList': kaohescoresinfoList, 
-                                 'kaohenameKindList': kaohenameKindList}}
+                                 'page': number,
+                                 'paginator':paginator, 
+                                 'kaohenameKindList': kaohenameKindList,
+                                 'pageSep': self.pageSep}}
             else:
                 kaohenameKindList = []
                 kaohescoresinfoList = []
+                paginator = Paginator(kaohescoresinfoList, self.pageSep, 3) #分页器 
+                # 值1：所有的数据
+                # 值2：每一页的数据
+                # 值3：当最后一页数据少于n条，将数据并入上一页
+                try:
+                    # 获取第几页
+                    number = paginator.page(self.num)
+                except PageNotAnInteger:
+                    # 如果输入的页码数不是整数，那么显示第一页数据
+                    number = paginator.page(1)
+                except EmptyPage:
+                    number = paginator.page(paginator.num_pages)
                 info = '当月还没有考核事项'
                 try:
                     qkhname = kh.objects.filter( kaohe_department = department )
@@ -371,8 +388,11 @@ class getUserScore:
                 UserScoreData = {'userinfo': {'name': self.name,
                                  'roles': roles, 
                                  'department': department, 
-                                 'kaohescoresinfoList': kaohescoresinfoList, 
-                                 'kaohenameKindList': kaohenameKindList}}
+                                 'kaohescoresinfoList': kaohescoresinfoList,
+                                 'page': number,
+                                 'paginator': paginator, 
+                                 'kaohenameKindList': kaohenameKindList,
+                                 'pageSep': self.pageSep}}
                 UserScoreData['userinfo']['info'] = info
                 print(UserScoreData)
         except:
@@ -386,7 +406,7 @@ class getAddedUserScore(getUserScore):
 
     """
     def __init__(self, name, **kwds):
-        getUserScore.__init__(self, name, todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'])
+        getUserScore.__init__(self, name, num = kwds['num'], todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'], pageSep = kwds['pageSep'])
         self.eventTime = kwds['eventTime']
         self.events = kwds['events']
         self.kind = kwds['kind']
@@ -407,7 +427,7 @@ class getAddedUserScore(getUserScore):
             s = sc(score_user = self.name, score_datetime = eventdate, score_events = self.events, score_kind = self.kind, score_pre = pre, score_require_department = self.requireDepartment, score_require_username = self.requireUsername)
             s.save()
         info = '新增考核事项：' + self.events + '成功'
-        getAddedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
+        getAddedUserScoreView = getUserScore(self.name, num = self.num, pageSep = self.pageSep, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getAddedUserScoreData = getAddedUserScoreView.getUserScoreData()
         getAddedUserScoreData['userinfo']['info'] = info
         print(getAddedUserScoreData)
@@ -420,7 +440,7 @@ class getEditedUserScore(getUserScore):
 
     """
     def __init__(self, name, **kwds):
-        getUserScore.__init__(self, name, todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'])
+        getUserScore.__init__(self, name, num = kwds['num'], todayYear = kwds['todayYear'], todayMonth = kwds['todayMonth'], pageSep = kwds['pageSep'])
         try:
             self.Editscoreid = kwds['Editscoreid']
         except:
@@ -464,7 +484,7 @@ class getEditedUserScore(getUserScore):
             escpre.score_pre = int(Editpre)
             escpre.save()
             info = '自定义考核时长更新成功'
-        getUpdatedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
+        getUpdatedUserScoreView = getUserScore(self.name, num = self.num, pageSep = self.pageSep, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getUpdatedUserScoreData = getUpdatedUserScoreView.getUserScoreData()
         getUpdatedUserScoreData['userinfo']['info'] = info
         return getUpdatedUserScoreData
@@ -476,7 +496,7 @@ class getEditedUserScore(getUserScore):
         except:
             pass
         info = '考核事项已删除'
-        getDeledUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
+        getDeledUserScoreView = getUserScore(self.name, num = self.num, pageSep = self.pageSep, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getDeledUserScoreData = getDeledUserScoreView.getUserScoreData()
         getDeledUserScoreData['userinfo']['info'] = info
         return getDeledUserScoreData
@@ -484,7 +504,7 @@ class getEditedUserScore(getUserScore):
     def getEditingUserScore(self):
         info = '正在编辑考核事项'
         editscoreid = self.Editscoreid
-        getEditingUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
+        getEditingUserScoreView = getUserScore(self.name, num = self.num, pageSep = self.pageSep, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getEditingUserScoreData = getEditingUserScoreView.getUserScoreData()
         getEditingUserScoreData['userinfo']['info'] = info
         getEditingUserScoreData['userinfo']['editscoreid'] = int(editscoreid)   # 数据库中的主键id是'int'类型
@@ -511,7 +531,7 @@ class getEditedUserScore(getUserScore):
         except:
             pass
         info = '考核事项已更改！'
-        getSavedUserScoreView = getUserScore(self.name, todayYear = self.todayYear, todayMonth = self.todayMonth)
+        getSavedUserScoreView = getUserScore(self.name, num = self.num, pageSep = self.pageSep, todayYear = self.todayYear, todayMonth = self.todayMonth)
         getSavedUserScoreData = getSavedUserScoreView.getUserScoreData()
         getSavedUserScoreData['userinfo']['info'] = info
         return getSavedUserScoreData
