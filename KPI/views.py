@@ -347,6 +347,7 @@ def EditRules(request):
 def managerkaohe(request):
     if request.session.get('is_login',None):
         num = request.GET.get('index','1')
+        request.session['index'] = num
         try:
             pageSep = request.session['pageSep']
         except:
@@ -367,7 +368,10 @@ def managerkaohe(request):
 
 def PageFunc(request):
     if request.session.get('is_login',None):
-        num = request.GET.get('index','1')
+        try:
+            num = request.session['index']
+        except:
+            num = '1'
         if request.method == "POST":
             pageSep = int(request.POST.get('PageLength'))
             request.session['pageSep'] = pageSep    # 将一页展示多少行数存入session     
@@ -387,7 +391,10 @@ def PageFunc(request):
 
 def AddEvent(request):
     if request.session.get('is_login',None):
-        num = request.GET.get('index','1')
+        try:
+            num = request.session['index']
+        except:
+            num = '1'
         try:
             pageSep = request.session['pageSep']
         except:
@@ -415,7 +422,10 @@ def AddEvent(request):
 
 def Editevents(request):
     if request.session.get('is_login',None):
-        num = request.GET.get('index','1')
+        try:
+            num = request.session['index']
+        except:
+            num = '1'
         try:
             pageSep = request.session['pageSep']
         except:
