@@ -89,8 +89,8 @@ DATABASES = {
         'NAME': 'kpi',
         'USER': 'root',
         'PASSWORD': django_pass.mysqlpass,
-        'HOST': '66.66.66.100',
-        'PORT': '30360',
+        'HOST': '172.18.99.97',
+        'PORT': '3306',
         'OPTIONS': {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         }
