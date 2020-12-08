@@ -346,7 +346,12 @@ def EditRules(request):
 
 def managerkaohe(request):
     if request.session.get('is_login',None):
-                  
+        num = request.GET.get('index','1')
+        request.session['index'] = num
+        try:
+            pageSep = request.session['pageSep']
+        except:
+            pageSep = 10       
         if request.method == "GET":
             todayYear  = datetime.today().strftime('%Y')         #格式化str格式输出今天是几年
             todayMonth = datetime.today().strftime('%m')         #格式化str格式输出今天是几月
