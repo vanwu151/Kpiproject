@@ -90,7 +90,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': django_pass.mysqlpass,
         'HOST': '172.18.99.183',
-        'PORT': '33090',
+        'PORT': '33006',
         'OPTIONS': {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         }
