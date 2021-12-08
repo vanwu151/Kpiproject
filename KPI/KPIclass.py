@@ -137,7 +137,7 @@ class getKpiRules:
             test = kh.objects.filter( kaohe_department = department).exists()
             role = q.user_role 
             if test:
-                qkh = kh.objects.all()
+                qkh = kh.objects.filter( kaohe_department = department )
                 knameList = []
                 kKindList = []
                 kscoreList = []
