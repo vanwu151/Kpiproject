@@ -46,8 +46,9 @@ def register(request):
                 v5 = request.POST.get('pwd')
                 password = make_password(v5,None,'pbkdf2_sha256')
                 department = request.POST.get('department')
+                responsibility = request.POST.get('responsibility')
                 info = '恭喜！ ' + user + ' 用户注册成功！'
-                q = ui(user_name = user, user_phone = phone, user_password = password, user_department = department)
+                q = ui(user_name = user, user_phone = phone, user_password = password, user_department = department, user_responsibility = responsibility)
                 q.save()
             return render(request, 'Kpi/Login.html', {'userinfo': {'info': info}})   #注册成功返回到登录页面
     except:

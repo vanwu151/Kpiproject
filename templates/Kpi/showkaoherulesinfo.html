@@ -159,6 +159,25 @@
                                                         <th class="text-center sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 150px;">动作</th>
                                                     </tr>
                                                 </thead>
+                                                <form action="/AddRules/" method="POST" enctype="multipart/form-data">
+                                                    <tbody>
+                                                        <tr role="row" class="odd">
+                                                            <td class=" text-center"><input type="text" name="kaohe_name" required="" style="width: 300px;"></td>
+                                                            <td class=" text-center">
+                                                                <select name="kaohe_kind" required="" style="width: 90px;">
+                                                                    <option value="运维类">运维类</option>
+                                                                    <option value="项目类">项目类</option>
+                                                                    <option value="管理类">管理类</option>
+                                                                </select>
+                                                            </td>
+                                                            <td class=" text-center" >{{ userinfo.department }}</td>                                                               
+                                                            <td class=" text-center"><input type="text" name="kaohe_score" style="width: 90px;"></td>
+                                                            <td class=" text-center">
+                                                                <input type="submit" class="btn btn-xs btn-info" name="action" value="新增"/>
+                                                            </td>
+                                                        </tr>                                          
+                                                    </tbody>
+                                                </form>
                                                 {% for kaohename, kind , score in userinfo.kaoherulesinfoList %}
                                                     {% if kaohename == userinfo.editkaohename %}
                                                     <form action="/EditRules/" method="POST" enctype="multipart/form-data">
@@ -198,25 +217,6 @@
                                                     </form>                                                        
                                                     {% endif %}    
                                                 {% endfor %}
-                                                <form action="/AddRules/" method="POST" enctype="multipart/form-data">
-                                                    <tbody>
-                                                        <tr role="row" class="odd">
-                                                            <td class=" text-center"><input type="text" name="kaohe_name" required="" style="width: 300px;"></td>
-                                                            <td class=" text-center">
-                                                                <select name="kaohe_kind" required="" style="width: 90px;">
-                                                                    <option value="运维类">运维类</option>
-                                                                    <option value="项目类">项目类</option>
-                                                                    <option value="管理类">管理类</option>
-                                                                </select>
-                                                            </td>
-                                                            <td class=" text-center" >{{ userinfo.department }}</td>                                                               
-                                                            <td class=" text-center"><input type="text" name="kaohe_score" style="width: 90px;"></td>
-                                                            <td class=" text-center">
-                                                                <input type="submit" class="btn btn-xs btn-info" name="action" value="新增"/>
-                                                            </td>
-                                                        </tr>                                          
-                                                    </tbody>
-                                                </form>
                                             </table>    
                                         </table>
                                     </div>

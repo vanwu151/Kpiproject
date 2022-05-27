@@ -9,6 +9,7 @@ class userinfo(models.Model):
 	# user_sex = models.CharField(max_length=20)
 	# user_city = models.CharField(max_length=20)
 	user_department = models.CharField(max_length=50)
+	user_responsibility = models.CharField(max_length=20)
 	# user_hobby = models.CharField(max_length=200)
 	user_password = models.CharField(max_length=128, default="")
 	user_role = models.CharField(max_length=20, default="")

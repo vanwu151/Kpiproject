@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Sum
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
 from .models import userinfo as ui
 from .models import kaohe as kh
 from .models import score as sc
@@ -137,7 +138,7 @@ class getKpiRules:
             test = kh.objects.filter( kaohe_department = department).exists()
             role = q.user_role 
             if test:
-                qkh = kh.objects.filter( kaohe_department = department )
+                qkh = kh.objects.filter( kaohe_department = department ).order_by('-id')
                 knameList = []
                 kKindList = []
                 kscoreList = []
@@ -333,6 +334,8 @@ class getUserScore:
             q = ui.objects.get( user_name = self.name )
             department = q.user_department
             roles = q.user_role
+            reponsibility = q.user_responsibility
+            print(reponsibility)
             test = sc.objects.filter( score_user = self.name).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).exists()
             if test:
                 qsc = sc.objects.filter( score_user = self.name ).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).order_by( '-score_datetime' )
@@ -353,16 +356,36 @@ class getUserScore:
                 except EmptyPage:
                     number = paginator.page(paginator.num_pages)
                 kaohenameKindList = []
-                qkhname = kh.objects.filter( kaohe_department = department )
-                for v2 in qkhname:
-                    kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == '':
+                    print("reponsibility", reponsibility)
+                    qkhname = kh.objects.filter( kaohe_department = department )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'OPS':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( 'id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'OMS':
+                    print("reponsibility", reponsibility)
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'OA&HR':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'BI':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
                 UserScoreData = {'userinfo': {'name': self.name,
-                                 'roles': roles, 
-                                 'department': department, 
-                                 'page': number,
-                                 'paginator':paginator, 
-                                 'kaohenameKindList': kaohenameKindList,
-                                 'pageSep': self.pageSep}}
+                                'roles': roles, 
+                                'department': department, 
+                                'page': number,
+                                'paginator':paginator, 
+                                'kaohenameKindList': kaohenameKindList,
+                                'pageSep': self.pageSep}}
+                
             else:
                 kaohenameKindList = []
                 kaohescoresinfoList = []
@@ -380,9 +403,28 @@ class getUserScore:
                     number = paginator.page(paginator.num_pages)
                 info = '当月还没有考核事项'
                 try:
-                    qkhname = kh.objects.filter( kaohe_department = department )
-                    for v2 in qkhname:
-                        kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == '':
+                        print("reponsibility", reponsibility)
+                        qkhname = kh.objects.filter( kaohe_department = department )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'OPS':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( 'id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'OMS':
+                        print("reponsibility", reponsibility)
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'OA&HR':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'BI':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
                 except:
                     pass
                 UserScoreData = {'userinfo': {'name': self.name,
