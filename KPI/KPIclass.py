@@ -414,11 +414,11 @@ class getUserScore:
                             kaohenameKindList.append(v2.kaohe_name)
                     if reponsibility == 'OMS':
                         print("reponsibility", reponsibility)
-                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q( kaohe_name__icontains = "HR/OA" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
                         for v2 in qkhname:
                             kaohenameKindList.append(v2.kaohe_name)
                     if reponsibility == 'OA&HR':
-                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "BI" )).order_by( '-id' )
                         for v2 in qkhname:
                             kaohenameKindList.append(v2.kaohe_name)
                     if reponsibility == 'BI':
