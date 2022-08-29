@@ -378,6 +378,18 @@ class getUserScore:
                     qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )).order_by( '-id' )
                     for v2 in qkhname:
                         kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'SCM':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "中台" )|Q(kaohe_name__icontains = "CRM" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'API':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "SCM" )|Q(kaohe_name__icontains = "CRM" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
+                if reponsibility == 'CRM':
+                    qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "中台" )|Q(kaohe_name__icontains = "SCM" )).order_by( '-id' )
+                    for v2 in qkhname:
+                        kaohenameKindList.append(v2.kaohe_name)
                 UserScoreData = {'userinfo': {'name': self.name,
                                 'roles': roles, 
                                 'department': department, 
@@ -423,6 +435,18 @@ class getUserScore:
                             kaohenameKindList.append(v2.kaohe_name)
                     if reponsibility == 'BI':
                         qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "系统运维" )|Q(kaohe_name__icontains = "基础运维" )|Q( kaohe_name__icontains = "OMS" )|Q( kaohe_name__icontains = "HR/OA" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'SCM':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "中台" )|Q(kaohe_name__icontains = "CRM" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'API':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "SCM" )|Q(kaohe_name__icontains = "CRM" )).order_by( '-id' )
+                        for v2 in qkhname:
+                            kaohenameKindList.append(v2.kaohe_name)
+                    if reponsibility == 'CRM':
+                        qkhname = kh.objects.filter( kaohe_department = department ).exclude(Q(kaohe_name__icontains = "中台" )|Q(kaohe_name__icontains = "SCM" )).order_by( '-id' )
                         for v2 in qkhname:
                             kaohenameKindList.append(v2.kaohe_name)
                 except:
