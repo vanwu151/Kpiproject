@@ -336,6 +336,7 @@ class getUserScore:
             roles = q.user_role
             reponsibility = q.user_responsibility
             print(reponsibility)
+            require_department_list = ['客服中心','品牌营销部','供应链','开发部','商业智能中心','实体运营中心','电商运营中心','商品运营部','营运发展中心','人力资源部','财务部','总经办','董事会','行政部']
             test = sc.objects.filter( score_user = self.name).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).exists()
             if test:
                 qsc = sc.objects.filter( score_user = self.name ).filter( score_datetime__year = '{}'.format(self.todayYear) ).filter( score_datetime__month = '{}'.format(self.todayMonth)).order_by( '-score_datetime' )
@@ -396,7 +397,8 @@ class getUserScore:
                 #         kaohenameKindList.append(v2.kaohe_name)
                 UserScoreData = {'userinfo': {'name': self.name,
                                 'roles': roles, 
-                                'department': department, 
+                                'department': department,
+                                'require_department_list': require_department_list, 
                                 'page': number,
                                 'paginator':paginator, 
                                 'kaohenameKindList': kaohenameKindList,
@@ -474,7 +476,8 @@ class getUserScore:
                     pass
                 UserScoreData = {'userinfo': {'name': self.name,
                                  'roles': roles, 
-                                 'department': department, 
+                                 'department': department,
+                                 'require_department_list': require_department_list, 
                                  'kaohescoresinfoList': kaohescoresinfoList,
                                  'page': number,
                                  'paginator': paginator, 

@@ -217,13 +217,13 @@
                                                     </form>
                                                     {% for m in userinfo.page.object_list %}
                                                         {% if m.id == userinfo.editscoreid %}
-                                                            {{ userinfo.editscoreid }}
+                                                            <!-- {{ userinfo.editscoreid }} -->
                                                             <form action="/Editevents/" method="POST" enctype="multipart/form-data">
                                                                 <tbody>
                                                                     <tr role="row" class="odd">
                                                                         <td class=" text-center"><input type="date" name="date" value='{{ m.score_datetime|date:"Y-m-d" }}' required="" style="width: 125px;"></td>
                                                                         <td class=" text-center">
-                                                                            <select name="requirement_department" required="" style="width: 90px;">                                                                            
+                                                                            <!-- <select name="requirement_department" required="" style="width: 90px;">                                                                            
                                                                                 <option value="客服中心" >客服中心</option>
                                                                                 <option value="品牌营销部" >品牌营销部</option>
                                                                                 <option value="供应链" >供应链</option>
@@ -238,6 +238,11 @@
                                                                                 <option value="总经办" >总经办</option>
                                                                                 <option value="董事会" >董事会</option>
                                                                                 <option value="行政部" >行政部</option>
+                                                                            </select> -->
+                                                                            <select name="requirement_department" required="" style="width: 90px;">
+                                                                                {% for require_department in userinfo.require_department_list %}                                                                           
+                                                                                    <option value="{{ require_department }}" {% if require_department  == m.score_require_department %} selected {% endif %}>{{ require_department }}</option>
+                                                                                {% endfor %}
                                                                             </select>
                                                                         </td>
                                                                         <td class=" text-center"><input type="text" name="requirement_username" value='{{ m.score_require_username }}' required="" style="width: 65px;"></td>
